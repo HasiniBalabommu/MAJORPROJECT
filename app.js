@@ -1,5 +1,5 @@
 if(process.env.NODE_ENV != 'production'){
-    require('dotenv').config(); // the reason of writing this is when we deploy the project the .NODE_ENV that time important passworsds from env environment shpuld get leaked 
+    require('dotenv').config(); // the reason of writing this is when we deploy the project the .NODE_ENV that time important passwords from env environment should get leaked 
 }
 console.log(process.env.SECRET);
 const express = require("express");
@@ -32,10 +32,11 @@ async function main() {
     }
 }
 main();
-app.set ("view engine","ejs");
+
+app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended:true}));
-app.use(express.static(path.join(__dirname,"/public")));// this allows to linl the styling through a single public folder for all file 
+app.use(express.static(path.join(__dirname,"/public")));// this allows to link the styling through a single public folder for all file 
 app.use(methodOverride('_method'));
 app.engine('ejs',ejsMate);
 app.use(express.static('public'));
@@ -48,7 +49,7 @@ const store = MongoStore.create({
     touchAfter: 24*3600,
 });
 
-store.on("error",()=>{
+store.on("error",(err)=>{
     console.log("ERROR in mongo session store",err);
 })
 
@@ -64,10 +65,9 @@ const sessionOptions = {
     }
 }
 
-
 app.use(session(sessionOptions));
 app.use(flash());
-// alwys flash() must be used before routes beacause insid these we need to use them right 
+// always flash() must be used before routes because inside these we need to use them right 
 
 app.use(passport.initialize());// this is mainly used so that all routes pass through this passport middleware
 app.use(passport.session());
@@ -75,7 +75,7 @@ passport.use(new localstrategy(user.authenticate()));
 passport.serializeUser(user.serializeUser());
 passport.deserializeUser(user.deserializeUser());
 
-//middlewares for success and  failure reactions 
+//middlewares for success and failure reactions 
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error  = req.flash("error");
@@ -92,33 +92,38 @@ app.use((req,res,next)=>{
 //     res.send(registered);
 // });
 
+// Routes
 app.use("/listings/:id/reviews", reviewrouter);
-app.use("/listings",listingrouter);// requiring the routes file in the above name litsings and require
+app.use("/listings",listingrouter);// requiring the routes file in the above name listings and require
 app.use("/",userrouter);
 
+// Root route - redirect to listings or serve a home page
+app.get("/", (req,res) =>{
+    res.redirect("/listings"); // Change this to whatever you want as your home page
+});
+
+// 404 handler - must be after all routes but before error handler
+app.all("*",(req,res,next)=>{
+    // Create a simple error object since ExpressError might not be available
+    const err = new Error("Page not Found");
+    err.status = 404;
+    next(err);
+});
+
+// Error handler - must be last middleware
+app.use((err,req,res,next) =>{ 
+    let{status = 500,message ="something went wrong"} = err;
+    res.status(status).render("error.ejs",{message});
+});
+
+// Start server with dynamic port for deployment
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>{
     console.log(`Server is listening to port ${PORT}`);
 });
 
-// app.get("/", (req,res) =>{
-//     res.send("Hi Iam root");
-// });
-
-app.use((err,req,res,next) =>{ // now we will set some default status and messgae if for 
-    let{status = 500,message ="something went wrong"} = err;
-    res.render("error.ejs",{message});
-});
-
-
 //Delete listing route and we need to make sure that if the listing is deleted 
 //you must make sure that the reviews of that listing should also be deleted if the listing itself is not present 
-
-
-
-
-
-
 
 // app.get("/testlisting", async (req,res)=>{
 //     let sample = new listing({
@@ -133,11 +138,5 @@ app.use((err,req,res,next) =>{ // now we will set some default status and messga
 //     res.send("Successful testing");
 // });
 
-// app.all("*",(req,res,next)=>{
-//     next (new ExpressError(404, "Page not Found"));
-// }); // if none of the routes is found then this middle ware is executed 
-
-
-
-// we will download a npm package called joi it defines schema not for moongose
-//it defines schema for validation of mongoose schema (severside validation)
+// we will download a npm package called joi it defines schema not for mongoose
+//it defines schema for validation of mongoose schem
