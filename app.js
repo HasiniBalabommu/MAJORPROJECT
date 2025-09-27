@@ -103,7 +103,7 @@ app.get("/", (req,res) =>{
 });
 
 // 404 handler - must be after all routes but before error handler
-app.all("*",(req,res,next)=>{
+app.use((req,res,next)=>{
     // Create a simple error object since ExpressError might not be available
     const err = new Error("Page not Found");
     err.status = 404;
@@ -139,4 +139,4 @@ app.listen(PORT, () =>{
 // });
 
 // we will download a npm package called joi it defines schema not for mongoose
-//it defines schema for validation of mongoose schem
+//it defines schema for validation of mongoose schema (serverside validation)
