@@ -56,7 +56,7 @@ const sessionOptions = {
     store,
     secret: process.env.SECRET,
     resave: false,
-    saveUnintialized: true,
+    saveUninitialized: true,
     cookie:{
         expires: Date.now() + 1000*60*60*24*3,
         maxAge:1000*60*60*24*3,
@@ -96,8 +96,9 @@ app.use("/listings/:id/reviews", reviewrouter);
 app.use("/listings",listingrouter);// requiring the routes file in the above name litsings and require
 app.use("/",userrouter);
 
-app.listen(8080, () =>{
-    console.log("Server is listening to port 8080");
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () =>{
+    console.log(`Server is listening to port ${PORT}`);
 });
 
 // app.get("/", (req,res) =>{
